@@ -1,0 +1,315 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+
+<title>BML Planner</title>
+	<style type='text/css'>
+		html, body {
+			width: calc(100% - 40px);
+			height: calc(100% - 40px);
+			margin: 0;
+			font-family: Arial, Helvetica, sans-serif;
+			background-color: #232323;
+			color:#fefefe;
+		}
+		textarea{
+			width: 600px;
+			min-height: 450px;
+			height: 100%;
+			background-color: rgba(50,50,50, 0.4);
+			color: #fefefe;
+			margin: 10px;
+			font-family: monospace;
+			font-size: x-large;
+		}
+		button{
+			border: 0;
+			border-radius: 2px;
+			padding: 5px 10px;
+			background-color: gray;
+			color: whitesmoke;
+			margin:2px;
+		}
+		button:hover{
+			cursor: pointer;
+			background-color: darkgray;
+			color: black;
+		}
+		input{
+			padding: 5px 10px;
+			width: 80px;
+		}
+		.container{
+			padding: 20px;
+		}
+
+		.right{
+			position: absolute;
+			right:0;
+		}
+		#msg-container{
+			width:620px; 
+			position:relative;
+			display: none;
+		}
+		.container-buttons
+		{
+			display: flex;
+			flex-flow: column;
+			position: relative;
+			margin: 10px;
+		}
+		.container-buttons input{
+			width: 15px;
+		}
+		.side-text{
+			margin: 2px;
+			display: flex;
+		}
+	</style>
+
+<meta property="og:title" content="WebGLStudio Player" />
+<meta property="og:description" content="Edit 3D on the web" />
+<meta property="og:image" content="" />
+
+<link rel="icon" type="image/png" href="favicon.ico">
+
+</head>
+<body>
+	<div >
+		<div class="container">
+			<h3>BML planner</h3>
+			<span>This page is for testing the BML realizer communication. Specify the room session (it has to be the same that you put previously in the realizer page. Write BML actions in JSON format and click send button to send the behaviours to the realizer. </span>
+			<div class="container">
+				<input id = "room" placeholder="room1">
+				<button id="btn-connect">Connect</button>
+			</div>
+			<div id = "msg-container">
+				<div><textarea id = "message" placeholder='{
+	"type: "behaviours",
+	"data": {
+		"type": "facialLexeme",
+		"lexeme": "MOUTH_OPEN",
+		"start": 0,
+		"attackPeak": 0.25,
+		"relax": 0.75,
+		"end": 1,
+		"amount": 0.5,
+		"faceShift": false
+	}
+				}'></textarea>
+					<div class="right">
+						<button id="btn-pretty"  onclick= "printTheJSONInPrettyFormat()">Prettify</button>
+						<button id="btn-send">Send</button>
+					</div>
+				</div>				
+				<div class="container-buttons">
+					<span style="display:flex"><button onclick="putContent('faceLexeme')">FaceLexeme</button><span class="side-text"><input type="checkbox" id ="shift-lexeme" >Shift</span></span>
+					<span style="display:flex"><button onclick="putContent('faceEmotion')">FaceEmotion</button><span class="side-text"><input type="checkbox" id ="shift-emotion">Shift</span></span>
+					<button onclick="putContent('gaze')">Gaze</button>
+					<button onclick="putContent('gazeShift')">GazeShift</button>
+					<button onclick="putContent('head')">Head</button>
+					<button onclick="putContent('headDirectionShift')">HeadDirectionShift</button>
+					<button onclick="putContent('speech')">Speech</button>
+					<button onclick="putContent('lg')">Lg</button>
+					<button onclick="putContent('gesture')">Gesture</button>
+				</div>
+			</div>
+		</div>		
+	</div>
+	
+<script type="text/javascript">
+
+	var ws = null;
+	function connectWS(){
+		// Host string ("wss://.." if https)
+		var hostString = "wss://webglstudio.org/port/9003/ws/";
+		ws = new WebSocket(hostString);
+		console.log("Connecting to " + hostString + "...");
+	
+		// EVENTS
+		// onopen
+		ws.onopen = function(){			
+			console.log("Connected to "+ hostString);
+		}
+		ws.onmessage = function(msg){
+			var m = JSON.parse(msg.data)
+			if(m.type == "info"){
+				if(m.data.includes("Session does not exist") || m.data.includes("session has been terminated"))
+				{
+					document.getElementById("msg-container").style.display = "none";
+					alert(m.data)
+				}
+				else if(m.data.includes("session"))
+					document.getElementById("msg-container").style.display = "flex";
+			}
+			console.log(m)
+		}
+	}
+	connectWS();
+	
+	//-----------------------------CONNECTION-------------------------------
+	// Get the button that connects to server session
+	var connectBtn = document.getElementById("btn-connect");
+	connectBtn.onclick = setRoom
+
+	var input = document.getElementById("room");
+	input.onkeydown = function(e){
+		if(e.key == "Enter")
+			setRoom();
+	}
+	// When the user clicks the button, open the modal 
+
+	function setRoom() {
+		var room = input.value;
+		ws.send(JSON.stringify({type: "session", data: { token: room, action: "connect"}}));
+	}
+
+	//--------------------------SEND MESSAGE----------------------------------
+	var sendBtn = document.getElementById("btn-send");
+	sendBtn.onclick = function(){
+		var msg = printTheJSONInPrettyFormat()
+		if(!msg)
+			return;
+		
+		ws.send(msg);
+	}
+
+
+	function printTheJSONInPrettyFormat() {
+      var badJSON = document.getElementById('message').value;
+	  try{
+		var parseJSON = JSON.parse(badJSON);
+		var JSONInPrettyFormat = JSON.stringify(parseJSON, undefined, 4);
+		document.getElementById('message').value = JSONInPrettyFormat;
+		return JSONInPrettyFormat;
+	  }
+	  catch(e){
+		
+		alert("Invalid JSON format")
+		return;	
+	  }
+	}
+	
+	function putContent(action)
+	{
+		var content = '';
+		switch(action)
+		{
+			case "faceLexeme":
+				var lexemes = ["LIP_CORNER_DEPRESSOR","LIP_CORNER_DEPRESSOR_LEFT","LIP_CORNER_DEPRESSOR_RIGHT","LIP_CORNER_PULLER","LIP_CORNER_PULLER_LEFT","LIP_CORNER_PULLER_RIGHT","OPEN_LIPS","PRESS_LIPS","MOUTH_OPEN","LOWER_LIP_DEPRESSOR","CHIN_RAISER","LIP_PUCKERER","TONGUE_SHOW","LIP_STRECHER","LIP_FUNNELER","LIP_TIGHTENER","LIP_PRESSOR","BROW_LOWERER","BROW_LOWERER_LEFT","LOWER_RIGHT_BROW","LOWER_BROWS","INNER_BROW_RAISER","OUTER_BROW_RAISER","RAISE_LEFT_BROW","RAISE_RIGHT_BROW","RAISE_BROWS","UPPER_LID_RAISER","CHEEK_RAISER","LID_TIGHTENER","EYES_CLOSED","BLINK","WINK","NOSE_WRINKLER","UPPER_LIP_RAISER","DIMPLER","DIMPLER_LEFT","DIMPLER_RIGHT","JAW_DROP","MOUTH_STRETCH"]; 
+				var shift = document.getElementById("shift-lexeme").checked;
+				content = {
+					type: "behaviours", 
+					data: [{
+						type: "faceLexeme",
+						lexeme: lexemes[Math.floor(Math.random()*lexemes.length)],
+						start: 0,
+						attackPeak: 0.25,
+						relax: 0.75,
+						end: 1,
+						amount: 0.5,
+						shift: shift
+					}]}
+				break;
+			case "faceEmotion":
+				var emotions =  ["HAPPINESS", "SADNESS", "ANGER", "SURPRISE", "CONTEMPT", "DISGUST", "FEAR", "NEUTRAL"]
+				var shift = document.getElementById("shift-emotion").checked;
+				content = {
+					type: "behaviours", 
+					data: [{
+						type: "faceEmotion",
+						emotion: emotions[Math.floor(Math.random()*emotions.length)],
+						start: 0,
+						attackPeak: 0.25,
+						relax: 0.75,
+						end: 1,
+						amount: 0.5,
+						shift: shift
+					}]}
+				break;
+			case "gaze":
+				var dir = ["RIGHT", "LEFT", "UP", "DOWN", "UPRIGHT", "UPLEFT", "DOWNRIGHT", "DOWNLEFT"];
+				var target = dir;
+				target.push("CAMERA")
+				var inf =  ["HEAD", "EYES", "NECK"];
+
+				var val = dir[Math.floor(Math.random()*dir.length)];
+				var val2 = Math.random()*30;
+				var val3 = inf[Math.floor(Math.random()*inf.length)];
+				var val4 = target[Math.floor(Math.random()*target.length)]
+				content = {
+					type: "behaviours", 
+					data: [{
+						type: "gaze","influence":val3, target:val4, "offsetDirection":val, "offsetAngle": val2, start: 0, ready: 0.33, relax: 0.66, end: 2.0
+				}]};
+				break;
+			case "gazeShift":
+				var dir = ["RIGHT", "LEFT", "UP", "DOWN", "UPRIGHT", "UPLEFT", "DOWNRIGHT", "DOWNLEFT"];
+				var target = dir;
+				target.push("CAMERA")
+				var inf =  ["HEAD", "EYES", "NECK"];
+				var val = dir[Math.floor(Math.random()*dir.length)];
+				var val2 = Math.random()*30;
+				var val3 = inf[Math.floor(Math.random()*inf.length)];
+				var val4 = target[Math.floor(Math.random()*target.length)]
+
+				content = {
+					type: "behaviours", 
+					data: [{
+						type: "gaze","influence":val3, target: val4, offsetDirection:val, offsetAngle: val2, start: 0, end: 2.0, shift: true
+				}]};
+				break;
+			case "head":
+				var opts =  ["NOD", "SHAKE", "TILT"];
+				var val = opts[Math.floor(Math.random()*opts.length)];
+				content = {
+					type: "behaviours", 
+						data: [{
+							type:"head",lexeme: val, repetition:1, start: 0, ready: 0.3, strokeStart: 0.3, stroke: 1, strokeEnd: 1.6, relax: 1.6, end: 2.0
+						}]}
+				break;
+			case "headDirectionShift":
+				var dir = ["RIGHT", "LEFT", "UP", "DOWN", "UPRIGHT", "UPLEFT", "DOWNRIGHT", "DOWNLEFT"];
+				var target = dir;
+				target.push("CAMERA");
+				var val4 = target[Math.floor(Math.random()*target.length)]
+				content = {
+					type: "behaviours", 
+					data: [{
+						type: "headDirectionShift", target: val4, start: 0, end: 2.0
+				}]};
+				break;
+			case "speech":
+				content = {
+						type: "behaviours", 
+						data: [{
+							type: "speech", text: "Hi. How are you?", start: 0, end: 2.0
+					}]};
+				break;
+			case "lg":
+				content = {
+						type: "behaviours", 
+						data: [{
+							type: "lg", url: "https://webglstudio.org/projects/present/audios/RAO/How%20old%20are%20you.wav", start: 0, end: 2.0
+					}]};
+				break;
+			case "gesture":
+				var opts =  ["WAVE", "PRESENT"];
+				var val = opts[Math.floor(Math.random()*opts.length)];
+				content = {
+					type: "behaviours", 
+					data: [{
+							type:"gesture",lexeme: val, repetition:0, start: 0, ready: 0.3, strokeStart: 0.3, stroke: 1, strokeEnd: 1.6, relax: 1.6, end: 2.0, amount:1
+					}]}
+				break;
+		}
+		content = JSON.stringify(content);
+		document.getElementById('message').value = content;
+		printTheJSONInPrettyFormat();
+	}
+</script>
+
+</body>
+</html>
