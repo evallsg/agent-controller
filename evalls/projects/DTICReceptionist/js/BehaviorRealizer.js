@@ -1751,8 +1751,8 @@ GestureManager.prototype.update = function (dt){
 
     this.gesture.weight = this.gesture.weight*(1-inter) + this.amount*inter;
 
-
   }
+
   // Stroke (phase 1)
   else if (this.time > this.strokeStart && this.time < this.stroke){
     inter = (this.time-this.strokeStart)/(this.stroke-this.strokeStart);
@@ -1762,7 +1762,6 @@ GestureManager.prototype.update = function (dt){
     // Should store previous rotation applied, so it is not additive
     this.gesture.weight = this.gesture.weight*(1-inter) + this.amount*inter;
   }
-
 
 
   // Stroke (phase 2)
@@ -1788,7 +1787,6 @@ GestureManager.prototype.update = function (dt){
     return;
   }
 
-
   // StrokeEnd (no repetition)
   else if (this.time > this.strokeEnd && this.time < this.relax)
   {
@@ -1796,8 +1794,6 @@ GestureManager.prototype.update = function (dt){
     
     return;
   }
-
-
 
   // Relax -> Move towards lookAt final rotation
   else if (this.time > this.relax && this.time < this.end){
@@ -2147,4 +2143,81 @@ Lipsync.prototype.stopSample = function(){
     this.stream = null;
 	}
 
+}
+AnimationManager.prototype.animations = {
+  "IDLE": "evalls/projects/animations/animations_idle.wbin",
+  "WAVE": "evalls/projects/animations/animations_waving.wbin", 
+  "NO": "evalls/projects/animations/animations_no.wbin", 
+  "BORED": "evalls/projects/animations/animations_bored.wbin",
+  "ANGRY": "evalls/projects/animations/animations_angry.wbin",
+  "HAPPY": "evalls/projects/animations/animations_happy.wbin",
+  "PRAYING": "evalls/projects/animations/animations_praying.wbin",
+  "CRAZY": "evalls/projects/animations/animations_crazy.wbin"
+}
+/* ANIMATION */
+function AnimationManager(component, animations){
+  
+  this.animManager = component;
+
+  // Animations
+  this.animations = animations || this.animations;
+  this.playing = false;
+}
+
+// animationData with animationID, sync attr, speed
+AnimationManager.prototype.newAnimation = function(animationData, animations){
+  this.currentAnim = {
+    speed: this.animManager.playback_speed,
+    animation: this.animManager.animation
+    }
+  
+  this.playing = false;
+  // Sync
+  this.start = animationData.start || 0.0;
+  this.speed = animationData.speed || 1.0;
+  this.shift = animationData.shift;
+  this.time = 0;
+  var url = this.animations[animationData.name];
+  this.animationName = url;
+  var anim = LS.RM.getResource(this.animationName)
+  
+  if(!anim)
+    LS.RM.load(this.animationName, null, this.setDuration.bind(this))
+  else
+    this.setDuration(anim)
+ 
+
+}
+AnimationManager.prototype.initValues = function()
+{
+  
+  this.time=0;
+}
+AnimationManager.prototype.setDuration = function(anim)
+{
+  this.duration = anim.takes.default.duration;
+}
+AnimationManager.prototype.update = function (dt){
+  
+  if(this.time == 0)
+    this.initValues();
+    // Wait for to reach start time
+    
+  if (this.time < this.start)
+    return;
+  else if(this.time>=this.start && !this.playing)
+  {
+    this.animManager.playback_speed = this.speed;
+    this.animManager.animation= this.animationName;
+    this.playing = true;
+  }
+    
+  else if(!this.shift && this.time>=this.duration && this.playing)
+  {
+    this.animManager.animation = this.currentAnim.animation;
+    this.animManager.playback_speed = this.currentAnim.speed;
+  }
+
+ 
+  this.time+=dt;
 }

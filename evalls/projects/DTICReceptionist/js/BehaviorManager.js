@@ -11,7 +11,7 @@ function BehaviorManager(){
   
   // BML instruction keys
   this.bmlKeys = ["blink", "gaze", "gazeShift", "face", "faceShift",
-                  "head", "headDirectonShift", "lg", "gesture", "posture"];
+                  "head", "headDirectonShift", "lg", "gesture", "posture", "animation"];
 
 	// BML stack
 	this.blinkStack = [];
@@ -22,14 +22,14 @@ function BehaviorManager(){
 	this.speechStack = [];
 	this.gestureStack = [];
 	this.pointingStack = [];
-  this.postureStack = [];
+ 	this.postureStack = [];
 
 	this.lgStack = [];
-
+	this.animationStack = [];
 
 	this.BMLStacks = [this.blinkStack, this.gazeStack, this.faceStack, this.headStack,
 						this.headDirStack, this.speechStack, this.lgStack,
-						this.gestureStack, this.pointingStack,this.postureStack];
+						this.gestureStack, this.pointingStack,this.postureStack, this.animationStack];
 
 	// Block stack
 	this.stack = [];
@@ -216,6 +216,9 @@ BehaviorManager.prototype.fixBlock = function(block){
 	if (block.pointing) 
     block.pointing = this.fixBML(block.pointing, "pointing", block,  {start: 0, ready: 0.3, strokeStart: 0.3, stroke: 0.4, strokeEnd: 0.6, relax: 0.7, end: 1.0});
 
+  // Animation
+	if (block.animation) 
+	block.animation = this.fixBML(block.animation, "animation", block,  {start: 0, end: 2.0});
 
 	// Find end of block
 	block.end = this.findEndOfBlock(block);
@@ -560,7 +563,9 @@ BehaviorManager.prototype.addToStack = function(block){
       
       if (block.lg) 
         this.processIntoBMLStack(block.lg, this.lgStack, this.time + block.start);
-			
+	
+	if (block.animation) 
+        this.processIntoBMLStack(block.animation, this.animationStack, this.time + block.start);
 			//TODO - Send warning feedback
 
       // Clean block
@@ -701,6 +706,10 @@ BehaviorManager.prototype.addToBMLStack = function(block){
   // LG
 	if (block.lg)
 		this.processIntoBMLStack(block.lg, this.lgStack, globalStart, block.composition);
+		
+  // Animation
+	if (block.animation)
+		this.processIntoBMLStack(block.animation, this.animationStack, globalStart, block.composition);
 
 }
 
@@ -846,10 +855,11 @@ BehaviorManager.prototype.check = function(){
 	if (this.errorCheck(this.headStack)) console.error("Previous error is in head stack");
 	if (this.errorCheck(this.headDirStack)) console.error("Previous error is in headDir stack");
 	if (this.errorCheck(this.speechStack)) console.error("Previous error is in speech stack");
-  if (this.errorCheck(this.postureStack)) console.error("Previous error is in posture stack");
+	if (this.errorCheck(this.postureStack)) console.error("Previous error is in posture stack");
 	if (this.errorCheck(this.gestureStack)) console.error("Previous error is in gesture stack");
-  //if (this.errorCheck(this.pointingStack)) console.error("Previous error is in pointing stack");
+  	if (this.errorCheck(this.pointingStack)) console.error("Previous error is in pointing stack");
 	if (this.errorCheck(this.lgStack)) console.error("Previous error is in lg stack");
+	if (this.errorCheck(this.animationStack)) console.error("Previous error is in animation stack");
 }
 
 BehaviorManager.prototype.errorCheck = function(stack){

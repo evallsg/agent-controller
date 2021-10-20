@@ -34,6 +34,12 @@ this.onStart = function()
    else
    	LS.Globals.gestureManager = new GestureManager(poser) 
   
+  var playAnimation = LS.GlobalScene.findNodeComponents("PlayAnimation")[0];
+  if(!playAnimation )
+    console.error("PlayAnimation component not found") 
+   else
+    LS.Globals.animationManager = new AnimationManager(playAnimation) ;
+
   LS.Globals.speechRecogniser = new window.SpeechRecognition();
   LS.Globals.speechRecogniser.lang = 'en-US';
   LS.Globals.speechRecogniser.onresult =  this.onResult;
@@ -65,20 +71,22 @@ this.onUpdate = function(dt)
 {
 	var newBlock = null;
  
-    if (LS.Globals.BehaviorPlanner)
-        newBlock = LS.Globals.BehaviorPlanner.update(dt);
+  if (LS.Globals.BehaviorPlanner)
+    newBlock = LS.Globals.BehaviorPlanner.update(dt);
 
-    if (LS.Globals.BehaviorManager)
-        LS.Globals.BehaviorManager.update(LS.Globals.processBML, LS.GlobalScene.time);
+  if (LS.Globals.BehaviorManager)
+    LS.Globals.BehaviorManager.update(LS.Globals.processBML, LS.GlobalScene.time);
 		
   if(LS.Globals.gestureManager)
-      LS.Globals.gestureManager.update(dt)
+    LS.Globals.gestureManager.update(dt)
       
-    if (newBlock !== null && newBlock !== undefined) 
-    {
-        LS.Globals.BehaviorManager.newBlock(newBlock, LS.GlobalScene.time);
-    	
-    }
+  if(LS.Globals.animationManager)
+    LS.Globals.animationManager.update(dt)
+  
+  if (newBlock !== null && newBlock !== undefined) 
+  {
+    LS.Globals.BehaviorManager.newBlock(newBlock, LS.GlobalScene.time);  
+  }
     
   if(LS.Globals.lipsyncModule)
     LS.Globals.lipsyncModule.update();
@@ -360,6 +368,9 @@ LS.Globals.processBML = function(key, bml) {
             break;
         case "pointing":
             break;
+        case "animation":
+          LS.Globals.animationManager.newAnimation(bml)
+          break;
         case "lg":
           LS.Globals.lipsyncModule.loadSample(bml.url)
           //thatFacial.newLipSync()
