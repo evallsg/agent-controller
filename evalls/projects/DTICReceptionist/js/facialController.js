@@ -6,13 +6,13 @@ function FacialController(o) {
   this.lookAtEyes = {};
   this.lookAtHead = {};
   this.lookAtNeck = {};
- 	this.gazePositions = {
-    "RIGHT": [70, 100, 400], "LEFT": [-70, 100, 400],
-    "UP": [0, 130, 400], "DOWN": [0, 80, 400],
-    "UPRIGHT": [70, 130, 400], "UPLEFT": [-70, 130, 400],
-    "DOWNRIGHT": [70, 80, 400], "DOWNLEFT": [-70, 80, 400],
-    "CAMERA": [0, 100, 400]
-  };
+  this.gazePositions = {
+    "RIGHT": [60, 125, 400], "LEFT": [-80, 125, 400],
+    "UP": [-10, 165, 400], "DOWN": [-10, 105, 400],
+    "UPRIGHT": [60, 165, 400], "UPLEFT": [-80, 165, 400],
+    "DOWNRIGHT": [60, 105, 400], "DOWNLEFT": [-80, 105, 400],
+    "CAMERA": [-10, 125, 400]
+    };
 	// Blend shapes index
 	
   this.smileBSName = "Smile";
@@ -162,10 +162,10 @@ FacialController.prototype.onStart = function()
   
   if (!this.headNode)
     console.error("Head bone node not found with id: ");
-  else if(!this.gazePositions["HEADARGET"])
+  else if(!this.gazePositions["HEAD"])
   {
     var headNode = LS.GlobalScene.getNodeByUId(this.headNode)
-		this.gazePositions["HEADARGET"] = headNode.transform.globalPosition;
+		this.gazePositions["HEAD"] = headNode.transform.globalPosition;
    
   }
   LS.GlobalScene.getActiveCameras(true);
@@ -182,18 +182,18 @@ FacialController.prototype.onStart = function()
   
   if (!this.lookAtEyes) 
     console.error("LookAt Eyes not found");
-  else if(!this.gazePositions["EYESTARGET"]) 
-    this.gazePositions["EYESTARGET"] = lookAtEyesNode.transform.position;
+  else if(!this.gazePositions["EYES"]) 
+    this.gazePositions["EYES"] = lookAtEyesNode.transform.position;
   
   if (!this.lookAtHead) 
     console.error("LookAt Head not found");
-  else if( !this.gazePositions["HEADARGET"]) 
-    this.gazePositions["HEADARGET"] = lookAtHeadNode.transform.position;
+  else if( !this.gazePositions["HEAD"]) 
+    this.gazePositions["HEAD"] = lookAtHeadNode.transform.position;
   
   if (!this.lookAtNeck) 
     console.error("LookAt Neck not found");
-  else if( !this.gazePositions["NECKTARGET"] )
-    this.gazePositions["NECKTARGET"] = lookAtNeckNode.transform.position;
+  else if( !this.gazePositions["NECK"] )
+    this.gazePositions["NECK"] = lookAtNeckNode.transform.position;
 
 
   // Gaze manager
@@ -217,13 +217,9 @@ FacialController.prototype.onUpdate = function(e,dt)
   if (LS.GlobalScene._cameras[0])
   {
   	this.gazePositions["CAMERA"] = LS.GlobalScene.getCamera().getEye();
-    this.gazePositions["CAMERA"][2] = 400;
+    //this.gazePositions["CAMERA"][2] = 400;
   }
-  // Update facial expression
-  this.faceUpdate(dt);
-  // Face blend (blink, facial expressions, lipsync)
-  this.facialBlend(dt);
-  
+ 
   // Gaze
   if (this.gazeManager){
   	var weights = this.gazeManager.update(dt);
@@ -235,7 +231,11 @@ FacialController.prototype.onUpdate = function(e,dt)
     	this._facialBS[keys[0]][this._squintBS[0][0]] = weights.squint
     }
   }
-  
+   // Update facial expression
+   this.faceUpdate(dt);
+   // Face blend (blink, facial expressions, lipsync)
+   this.facialBlend(dt);
+   
   // Head behavior
   this.headBMLUpdate(dt);
  
@@ -612,11 +612,12 @@ FacialController.prototype.resetFace = function(){
 // target [CAMERA, RIGHT, LEFT, UP, DOWN, UPRIGHT, UPLEFT, DOWNLEFT, DOWNRIGHT]
 
 // "HEAD" position is added onStart
-this.gazePositions = { "RIGHT": [70, 100, 400], "LEFT": [-70, 100, 400],
-  "UP": [0, 130, 400], "DOWN": [0, 80, 400],
-  "UPRIGHT": [70, 130, 400], "UPLEFT": [-70, 130, 400],
-  "DOWNRIGHT": [70, 80, 400], "DOWNLEFT": [-70, 80, 400],
-  "CAMERA": [0, 100, 400]
+this.gazePositions = { 
+  "RIGHT": [60, 125, 400], "LEFT": [-80, 125, 400],
+  "UP": [-10, 165, 400], "DOWN": [-10, 105, 400],
+  "UPRIGHT": [60, 165, 400], "UPLEFT": [-80, 165, 400],
+  "DOWNRIGHT": [60, 105, 400], "DOWNLEFT": [-80, 105, 400],
+  "CAMERA": [-10, 125, 400]
 };
 
 

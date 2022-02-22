@@ -349,6 +349,11 @@ LS.Globals.processBML = function(key, bml) {
               bml.shift = false;
             thatFacial.newFA(bml, bml.shift);
             break;
+        case "faceVA":
+          if(bml.shift == undefined)
+            bml.shift = false;
+          thatFacial.newFA(bml, bml.shift);
+          break;
         case "faceShift":
             thatFacial.newFA(bml, true);
             break;

@@ -192,6 +192,10 @@ BehaviorManager.prototype.fixBlock = function(block){
 	if (block.faceEmotion) 
     block.face = this.fixBML(block.faceEmotion, "face", block, {start: 0, attackPeak: 0.4, relax: 0.6, end: 1});
 	
+	// Face VA
+	if (block.faceVA) 
+		block.face = this.fixBML(block.faceVA, "face", block, {start: 0, attackPeak: 0.4, relax: 0.6, end: 1});
+
   // FaceShift
 	if (block.faceShift) 
     block.faceShift = this.fixBML(block.faceShift, "faceShift", block, {start: 0, end: 1});
@@ -539,6 +543,8 @@ BehaviorManager.prototype.addToStack = function(block){
       
       if (block.faceFACS) 
         this.processIntoBMLStack(block.faceFACS, this.faceStack, this.time + block.start);
+	if (block.faceVA) 
+        this.processIntoBMLStack(block.faceVA, this.faceStack, this.time + block.start);
 			
       if (block.faceShift) 
         this.processIntoBMLStack(block.faceShift, this.faceStack, this.time + block.start);

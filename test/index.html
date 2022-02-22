@@ -107,6 +107,7 @@
 				<div class="container-buttons">
 					<span style="display:flex"><button onclick="putContent('faceLexeme')">FaceLexeme</button><span class="side-text"><input type="checkbox" id ="shift-lexeme" >Shift</span></span>
 					<span style="display:flex"><button onclick="putContent('faceEmotion')">FaceEmotion</button><span class="side-text"><input type="checkbox" id ="shift-emotion">Shift</span></span>
+					<span style="display:flex"><button onclick="putContent('faceVA')">FaceVA</button><span class="side-text"><input type="checkbox" id ="shift-va">Shift</span></span>
 					<button onclick="putContent('gaze')">Gaze</button>
 					<button onclick="putContent('gazeShift')">GazeShift</button>
 					<button onclick="putContent('head')">Head</button>
@@ -222,6 +223,22 @@
 					data: [{
 						type: "faceEmotion",
 						emotion: emotions[Math.floor(Math.random()*emotions.length)],
+						start: 0,
+						attackPeak: 0.25,
+						relax: 0.75,
+						end: 1,
+						amount: 0.5,
+						shift: shift
+					}]}
+				break;
+			case "faceVA":
+				
+				var shift = document.getElementById("shift-va").checked;
+				content = {
+					type: "behaviours", 
+					data: [{
+						type: "faceVA",
+						valaro: [0.2,0.8],
 						start: 0,
 						attackPeak: 0.25,
 						relax: 0.75,

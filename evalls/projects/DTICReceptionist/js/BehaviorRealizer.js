@@ -93,7 +93,7 @@ FacialExpr.prototype.initialLexBSW = [];
 FacialExpr.prototype.targetLexBSW = [];
 
 // Psyche Interpolation Table
-FacialExpr.prototype._pit = [0.000, 0.000,  0.000,  0.000,  0.000,  0.000,  0.000,  0.000,  0.000,  0.000,  0.000,
+/*FacialExpr.prototype._pit = [0.000, 0.000,  0.000,  0.000,  0.000,  0.000,  0.000,  0.000,  0.000,  0.000,  0.000,
                             0.000,  1.000,  0.138,  1.00,  0.000,  0.675,  0.000,  0.056,  0.200,  0.116,  0.100,
                             0.500,  0.866,  0.000,  0.700,  0.000,  0.000,  0.000,  0.530,  0.000,  0.763,  0.000,
                             0.866,  0.500,  0.000,  1.000,  0.000,  0.000,  0.600,  0.346,  0.732,  0.779,  0.000,
@@ -103,7 +103,22 @@ FacialExpr.prototype._pit = [0.000, 0.000,  0.000,  0.000,  0.000,  0.000,  0.00
                             0.000,  -1.000, 0.527,  0.000,  0.441,  0.531,  0.000,  0.000,  1.000,  0.000,  0.600,
                             -0.707, -0.707, 1.000,  0.000,  0.000,  0.000,  0.500,  1.000,  0.000,  0.000,  0.600,
                             -1.000, 0.000,  0.995,  0.000,  0.225,  0.000,  0.000,  0.996,  0.000,  0.996,  0.200,
-                            -0.707, 0.707,  0.138,  0.075,  0.000,  0.675,  0.300,  0.380,  0.050,  0.216,  0.300];
+                            -0.707, 0.707,  0.138,  0.075,  0.000,  0.675,  0.300,  0.380,  0.050,  0.216,  0.300];*/
+
+/* "valence", "arousal" ,"BLINK","CHEEK_RAISER", "LIP_CORNER_PULLER", "BROW_LOWERER", "DIMPLER", "OUTER_BROW_RAISER", "
+UPPER_LID_RAISER", "JAW_DROP","LID_TIGHTENER", "LIP_STRECHER","NOSE_WRINKLER", "LIP_CORNER_DEPRESSOR", "CHIN_RAISER", "LIP_CORNER_PULLER_RIGHT", "DIMPLER_RIGHT"*/
+FacialExpr.prototype._pit = [
+  [1, 0.25 ,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0 ],//HAPPINESS
+  [0.80, -0.6, 0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0 ], //SADNESS
+  [0.25, 1, 0,0,0,1,0,1,1,1,0,0,0,0,0,0,0,0 ], //SURPRISED
+  [-0.25, 1 ,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0 ], //FEAR
+  [-0.76, 0.64,0 , 0,0,0,1,0,1,0,1,0,1,0,0,0,0,0 ], //ANGER
+  [-1, -0.25,0, 0,0,0,0,0,0,0,0,0,0,1,1,1,0,0 ], //DISGUST
+  [-1, -0.25,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,1,1 ], //CONTEMPT
+  [0, 0 ,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ] //NEUTRAL
+ ]
+FacialExpr.prototype.VALexemes = ["BLINK","CHEEK_RAISER", "LIP_CORNER_PULLER", "BROW_LOWERER", "DIMPLER", "OUTER_BROW_RAISER", "UPPER_LID_RAISER", "JAW_DROP","LID_TIGHTENER", "LIP_STRECHER","NOSE_WRINKLER", "LIP_CORNER_DEPRESSOR", "CHIN_RAISER", "LIP_CORNER_PULLER_RIGHT", "DIMPLER_RIGHT"]
+ 
 
 FacialExpr.prototype._p = vec3.create();
 FacialExpr.prototype._pA = vec3.create();
@@ -267,20 +282,28 @@ FacialExpr.prototype.initFaceValAro = function(faceData, shift){
 
 
   // Initial blend shapes
-  if (this.sceneBSW)
-    for (var i = 0; i< this.sceneBSW.length; i++)
-      this.initialVABSW[i] = this.sceneBSW[i];
+  /*if (this.sceneBSW[FacialExpr.BODY_NAME])
+    for (var i = 0; i< this.sceneBSW[FacialExpr.BODY_NAME].length; i++){
+
+      if(!this.initialVABSW.length) 
+        this.initialVABSW.push(this.sceneBSW[FacialExpr.BODY_NAME][i]);
+      else 
+        this.initialVABSW[i] = this.sceneBSW[FacialExpr.BODY_NAME][i];
+      if(!this.targetVABSW.length) 
+        this.targetVABSW.push(this.sceneBSW[FacialExpr.BODY_NAME][i]);
+      else this.targetVABSW[i] = this.sceneBSW[FacialExpr.BODY_NAME][i];
+    }
+    */  
   // Target blend shapes
   this.VA2BSW(this.valaro, this.targetVABSW);
   
-
   
   // Start
   this.transition = true;
   this.time = 0;
 
 }
-FacialExpr.BODY_NAME = "Body_SSS";
+FacialExpr.BODY_NAME = "Body";
 // There can be several facelexemes working at the same time then? lexemes is an array of lexeme objects
 FacialExpr.prototype.initFaceAU = function(faceData, shift, lexemes){
   FacialExpr.BODY_NAME = this.sceneBSW["Body_SSS"] ? "Body_SSS" : "Body";
@@ -426,8 +449,11 @@ FacialExpr.prototype.updateVABSW = function(interVABSW, dt){
 
   // Immediate change
   if (this.attackPeak == 0 && this.end == 0 && this.time == 0){
-    for (var i = 0; i < this.sceneBSW.length; i++)
-      interVABSW[i] = this.targetVABSW[i];
+    for (var i = 0; i < this.indicesVA.length; i++)
+    {
+      for(var j = 0; j < this.indicesVA[i].length; j++)
+        interVABSW[FacialExpr.BODY_NAME][this.indicesVA[i][j]] = this.targetVABSW[i][j];
+    }
     // Increase time and exit
     this.time +=dt;
     return;
@@ -457,9 +483,11 @@ FacialExpr.prototype.updateVABSW = function(interVABSW, dt){
     inter = Math.cos(Math.PI*inter+Math.PI)*0.5 + 0.5;
     //inter = Math.cos(Math.PI*inter+Math.PI)*0.5 + 0.5; // to increase curve, keep adding cosines
     // Interpolation
-    for (var i = 0; i < this.sceneBSW.length; i++)
-      interVABSW[i] = this.initialVABSW[i]*(1-inter) + this.targetVABSW[i]*inter;
-    
+    for (var i = 0; i < this.indicesVA.length; i++)
+    {
+      for(var j = 0; j < this.indicesVA[i].length; j++)
+        interVABSW[FacialExpr.BODY_NAME][this.indicesVA[i][j]] = this.initialVABSW[i][j]*(1-inter) + this.targetVABSW[i][j]*inter;
+    }
   }
   
   // Trans 2
@@ -468,10 +496,12 @@ FacialExpr.prototype.updateVABSW = function(interVABSW, dt){
     // Cosine interpolation
     inter = Math.cos(Math.PI*inter)*0.5 + 0.5;
     // Interpolation
-    for (var i = 0; i < this.sceneBSW.length; i++)
-      interVABSW[i] = this.initialVABSW[i]*(1-inter) + this.targetVABSW[i]*inter;
+    for (var i = 0; i < this.indicesVA.length; i++)
+    {
+      for(var j = 0; j < this.indicesVA[i].length; j++)
+        interVABSW[FacialExpr.BODY_NAME][this.indicesVA[i][j]] = this.initialVABSW[i][j]*(1-inter) + this.targetVABSW[i][j]*inter;
+    }
   }
-  
   
   // End
   if (this.time > this.end)
@@ -562,18 +592,18 @@ FacialExpr.prototype.VA2BSW = function(valAro, facialBSW){
   
   maxDist = 0.8;
   
-  var blendValues = [0,0,0,0,0,0,0,0,0]; // Memory leak, could use facialBSW and set to 0 with a for loop
-  var bNumber = 11;
+  var blendValues = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]; // Memory leak, could use facialBSW and set to 0 with a for loop
+  var bNumber = 18;
   
   this._p[0] = valAro[0];
   this._p[1] = valAro[1];
   this._p[2] = 0; // why vec3, if z component is always 0, like pA?
 
   this._pA[2] = 0;
-
-  for (var count = 0; count < this._pit.length/bNumber; count++){
-    this._pA[1] = this._pit[count*bNumber];
-    this._pA[0] = this._pit[count*bNumber+1];
+  
+  for (var count = 0; count < this._pit.length; count++){
+    this._pA[0] = this._pit[count][0];
+    this._pA[1] = this._pit[count][1];
 
     var dist = vec3.dist(this._pA, this._p);
     dist = maxDist - dist;
@@ -581,25 +611,162 @@ FacialExpr.prototype.VA2BSW = function(valAro, facialBSW){
     // If the emotion (each row is an emotion in pit) is too far away from the act-eval point, discard
     if (dist > 0){
       for (var i = 0; i < bNumber-2; i++){
-        blendValues[i] += this._pit[count*bNumber +i+2] * dist;
+        blendValues[i] += this._pit[count][i+2] * dist;
       }
     }
   }
-
-
-  // Store blend values
-  facialBSW [ 0 ] = blendValues[0]; // sad
-  facialBSW [ 1 ] = blendValues[1]; // smile
-  facialBSW [ 2 ] = blendValues[2]; // lips closed pressed
-  facialBSW [ 3 ] = blendValues[3]; // kiss
+  this.indicesVA = [];
+  this.initialVABSW = [];
+  this.targetVABSW = [];
+  var j = 0;
+  for(var i=0; i< this.VALexemes.length; i++)
+  {
+    var index = this[this.VALexemes[i]].split("&");
   
-  facialBSW [4]  = blendValues[4]; // jaw
+    if (index !== undefined)
+    {
+      // Indices
+      this.indicesVA[j] = index;
+      this.initialVABSW[j] = [];
+      this.targetVABSW[j] = [];
+      for(var idx in index)
+      {
+        // Initial
+        var sign = 1;
+        if(idx.includes("-"))
+        {
+          sign = -1;
+          var ii = this.indicesVA.indexOf(idx);
+          idx = idx.replace("-","");
+          this.indicesVA[ii] = idx;
+        }
+        this.initialVABSW[j][idx] = this.sceneBSW[FacialExpr.BODY_NAME][index[idx]];
+        // Target
+        this.targetVABSW[j][idx] = sign*blendValues[i];
+      }
+    }
+    j++
+  }
+  //this.sceneBSW[FacialExpr.BODY_NAME][index[idx]]
+  
+/*
+  index = this["LIP_CORNER_PULLER"].split("&");
+  if (index !== undefined){
+    for(var idx in index)
+        {
+          facialBSW[index[idx]] = blendValues[1];
+        }
+  }
+  index = this["INNER_BROW_RAISER"].split("&");
+  if (index !== undefined){
+    for(var idx in index)
+        {
+          facialBSW[index[idx]] = blendValues[2];
+        }
+  }
+  index = this["BROW_LOWERER"].split("&");
+  if (index !== undefined){
+    for(var idx in index)
+        {
+          facialBSW[index[idx]] = blendValues[3];
+        }
+  }
+  index = this["DIMPLER"].split("&");
+  if (index !== undefined){
+    for(var idx in index)
+        {
+          facialBSW[index[idx]] = blendValues[4];
+        }
+  }
+  index = this["OUTER_BROW_RAISER"].split("&");
+  if (index !== undefined){
+    for(var idx in index)
+        {
+          facialBSW[index[idx]] = blendValues[5];
+        }
+  }
+  index = this["UPPER_LID_RAISER"].split("&");
+  if (index !== undefined){
+    for(var idx in index)
+        {
+          facialBSW[index[idx]] = blendValues[6];
+        }
+  }
+  index = this["JAW_DROP"].split("&");
+  if (index !== undefined){
+    for(var idx in index)
+        {
+          facialBSW[index[idx]] = blendValues[7];
+        }
+  }
+  index = this["LID_TIGHTENER"].split("&");
+  if (index !== undefined){
+    for(var idx in index)
+        {
+          facialBSW[index[idx]] = blendValues[8];
+        }
+  }
+  index = this["LIP_STRECHER"].split("&");
+  if (index !== undefined){
+    for(var idx in index)
+        {
+          facialBSW[index[idx]] = blendValues[9];
+        }
+  }
+  index = this["NOSE_WRINKLER"].split("&");
+  if (index !== undefined){
+    for(var idx in index)
+        {
+          facialBSW[index[idx]] = blendValues[10];
+        }
+  }
+  index = this["LIP_CORNER_DEPRESSOR"].split("&");
+  if (index !== undefined){
+    for(var idx in index)
+        {
+          facialBSW[index[idx]] = blendValues[11];
+        }
+  }
+  index = this["CHIN_RAISER"].split("&");
+  if (index !== undefined){
+    for(var idx in index)
+        {
+          facialBSW[index[idx]] = blendValues[12];
+        }
+  }
+  index = this["LIP_CORNER_PULLER_RIGHT"].split("&");
+  if (index !== undefined){
+    for(var idx in index)
+        {
+          facialBSW[index[idx]] = blendValues[13];
+        }
+  }
+  index = this["DIMPLER_RIGHT"].split("&");
+  if (index !== undefined){
+    for(var idx in index)
+        {
+          facialBSW[index[idx]] = blendValues[14];
+        }
+  }*/
+  // Store blend values
+  /*facialBSW [ 0 ] = blendValues[0]; // CHEEK_RAISER
+  facialBSW [ 1 ] = blendValues[1]; // LIP_CORNER_PULLER
+  facialBSW [ 2 ] = blendValues[2]; // INNER_BROW_RAISER
+  facialBSW [ 3 ] = blendValues[3]; // BROW_LOWERER
+  
+  facialBSW [4]  = blendValues[4]; // DIMPLER
 
-  facialBSW [5] = blendValues[5]; // eyebrow down
-  facialBSW [6] = blendValues[6]; // eyebrow rotate outwards
-  facialBSW [7] = blendValues[7]; // eyebrow up
-  facialBSW [8] = blendValues[8]; // eyelids closed
-
+  facialBSW [5] = blendValues[5]; // OUTER_BROW_RAISER
+  facialBSW [6] = blendValues[6]; // UPPER_LID_RAISER
+  facialBSW [7] = blendValues[7]; // JAW_DROP
+  facialBSW [8] = blendValues[8]; // LID_TIGHTENER
+  facialBSW [9] = blendValues[9]; // LIP_STRECHER
+  facialBSW [10] = blendValues[10]; // NOSE_WRINKLER
+  facialBSW [11] = blendValues[11]; // LIP_CORNER_DEPRESSOR
+  facialBSW [12] = blendValues[12]; // CHIN_RAISER
+  facialBSW [13] = blendValues[13]; // LIP_CORNER_PULLER_RIGHT
+  facialBSW [15] = blendValues[14]; // DIMPLER_RIGHT
+*/
 }
 
 
@@ -620,11 +787,11 @@ FacialExpr.prototype.VA2BSW = function(valAro, facialBSW){
 
 // Gaze manager (replace BML)
 GazeManager.prototype.gazePositions = {
-  "RIGHT": [70, 100, 400], "LEFT": [-70, 100, 400],
-  "UP": [0, 130, 400], "DOWN": [0, 80, 400],
-  "UPRIGHT": [70, 130, 400], "UPLEFT": [-70, 130, 400],
-  "DOWNRIGHT": [70, 80, 400], "DOWNLEFT": [-70, 80, 400],
-  "CAMERA": [0, 100, 400]
+  "RIGHT": [60, 125, 400], "LEFT": [-80, 125, 400],
+  "UP": [-10, 165, 400], "DOWN": [-10, 105, 400],
+  "UPRIGHT": [60, 165, 400], "UPLEFT": [-80, 165, 400],
+  "DOWNRIGHT": [60, 105, 400], "DOWNLEFT": [-80, 105, 400],
+  "CAMERA": [-10, 125, 400]
 };
 
 
@@ -803,11 +970,11 @@ Gaze.prototype.update = function(dt , atEyes){
     // Cosine interpolation
     inter = Math.cos(Math.PI*inter+Math.PI)*0.5 + 0.5;
     
-    if(atEyes)
+    /*if(atEyes)
     {
       this.eyelidsW =this.eyelidsInitW*inter+this.eyelidsFinW*(1-inter); 
       this.squintW =this.squintInitW*(inter)+this.squintFinW*(1-inter); 
-    }
+    }*/
    // inter = Math.cos(Math.PI*inter+Math.PI)*0.5 + 0.5; // to increase curve, keep adding cosines
     // lookAt pos change
     vec3.lerp( this.lookAt.transform.position , this.InP, this.EndP, inter);
@@ -821,12 +988,12 @@ Gaze.prototype.update = function(dt , atEyes){
 
     // Cosine interpolation
     inter = Math.cos(Math.PI*inter + Math.PI)*0.5 + 0.5;
-    if(atEyes)
+    /*if(atEyes)
     {
      
     	this.eyelidsW =this.eyelidsInitW*(1-inter)+this.eyelidsFinW*(inter); 
       this.squintW =this.squintInitW*(1-inter)+this.squintFinW*(inter); 
-    }
+    }*/
     // lookAt pos change
     vec3.lerp( this.lookAt.transform.position , this.InP, this.EndP, inter);
     this.lookAt.transform.mustUpdate = true;
@@ -863,9 +1030,17 @@ Gaze.prototype.initGazeValues = function(isEyes){
   
   // Find target position (copy? for following object? if following object and offsetangle, need to recalculate all the time!)
   if (this.gazePositions)
-    if (this.gazePositions[this.target])
-  		vec3.copy(this.targetP, this.gazePositions[this.target]);
-  	else
+    if (this.gazePositions[this.target]){
+      if(this.target == "CAMERA")
+      {
+        // this.gazePositions[this.target][0]-=2;
+        if(isEyes)
+          this.gazePositions[this.target][1] += 5;
+        else
+          this.gazePositions[this.target][1] -= 8;
+      }
+      vec3.copy(this.targetP, this.gazePositions[this.target]);
+    }else
       vec3.set(this.targetP, 0, 110, 400);
   else
     vec3.set(this.targetP, 0, 110, 400);
@@ -1020,7 +1195,7 @@ HeadBML.prototype.initHeadData = function(headData){
   
   // Lexeme, repetition and amount
 	this.lexeme = headData.lexeme || "NOD";
-	this.amount = headData.amount || 0.5;
+	this.amount = headData.amount || 0.2;
 
 	// Maximum rotation amplitude
   if (this.lexeme == "NOD")
