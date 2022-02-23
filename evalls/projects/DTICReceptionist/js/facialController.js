@@ -502,7 +502,7 @@ FacialController.prototype.newFA = function(faceData, shift){
   }
   if(faceData.emotion)
   {
-    var data = Object.assign({}, faceData);
+    /*var data = Object.assign({}, faceData);
     data.type = "faceLexeme";
     var lexemes = [];
     switch(faceData.emotion)
@@ -538,12 +538,14 @@ FacialController.prototype.newFA = function(faceData, shift){
         "LIP_CORNER_PULLER_RIGHT", "DIMPLER_RIGHT"] //AU6+AU12
         data.amount= 1 - data.amount;
         break;
-    }
-    for(var i in lexemes)
+    }*/
+
+    /*for(var i in lexemes)
     {
       data.lexeme = lexemes[i];
       this._FacialLexemes.push(new FacialExpr (data, shift, this._facialBS));
-    }
+    }*/
+    this.FA = new FacialExpr (faceData, shift, this._facialBS);
   }
 	else if (faceData.valaro)
   	this.FA = new FacialExpr (faceData, shift, this._facialBS);

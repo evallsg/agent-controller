@@ -107,18 +107,43 @@ FacialExpr.prototype.targetLexBSW = [];
 
 /* "valence", "arousal" ,"BLINK","CHEEK_RAISER", "LIP_CORNER_PULLER", "BROW_LOWERER", "DIMPLER", "OUTER_BROW_RAISER", "
 UPPER_LID_RAISER", "JAW_DROP","LID_TIGHTENER", "LIP_STRECHER","NOSE_WRINKLER", "LIP_CORNER_DEPRESSOR", "CHIN_RAISER", "LIP_CORNER_PULLER_RIGHT", "DIMPLER_RIGHT"*/
-FacialExpr.prototype._pit = [
-  [1, 0.25 ,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0 ],//HAPPINESS
-  [0.80, -0.6, 0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0 ], //SADNESS
-  [0.25, 1, 0,0,0,1,0,1,1,1,0,0,0,0,0,0,0,0 ], //SURPRISED
-  [-0.25, 1 ,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0 ], //FEAR
+/*FacialExpr.prototype._pit = [
+  [0.95, 0.23 ,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0 ],//HAPPINESS
+  [-0.81, -0.57, 0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0 ], //SADNESS
+  [0.22, 0.98, 0,0,0,1,0,1,1,1,0,0,0,0,0,0,0,0 ], //SURPRISED
+  [-0.25, 0.98 ,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0 ], //FEAR
   [-0.76, 0.64,0 , 0,0,0,1,0,1,0,1,0,1,0,0,0,0,0 ], //ANGER
-  [-1, -0.25,0, 0,0,0,0,0,0,0,0,0,0,1,1,1,0,0 ], //DISGUST
-  [-1, -0.25,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,1,1 ], //CONTEMPT
+  [-0.96, 0.23,0, 0,0,0,0,0,0,0,0,0,0,1,1,1,0,0 ], //DISGUST
+  [-0.98, -0.21,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,1,1 ], //CONTEMPT
   [0, 0 ,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ] //NEUTRAL
- ]
+ ]*/
 FacialExpr.prototype.VALexemes = ["BLINK","CHEEK_RAISER", "LIP_CORNER_PULLER", "BROW_LOWERER", "DIMPLER", "OUTER_BROW_RAISER", "UPPER_LID_RAISER", "JAW_DROP","LID_TIGHTENER", "LIP_STRECHER","NOSE_WRINKLER", "LIP_CORNER_DEPRESSOR", "CHIN_RAISER", "LIP_CORNER_PULLER_RIGHT", "DIMPLER_RIGHT"]
- 
+FacialExpr.prototype._pit = [
+  [//ANGRY 
+    -0.76, 0.64, 0, 0, 0.37735849056603776, 0.37735849056603776, 0.660377358490566, 0.660377358490566, 0, 0, 0.006777392958909609, 0.006174350308024318, 0, 0, 0.008490566037735849, 0.008490566037735849, 0.3113207547169812, 0.3113207547169812, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.009433962264150943, 0.007983478260680202, 0.018497328267128684, 0, 0, 0.2655452832234524, 0.27559599407154056, 0.038135610804944806, 0.038135610804944806, 0.2358490566037736, 0.2358490566037736, 0, 0, 0, 0, 0
+    ],
+  [//HAPPY
+    0.95, 0.23, 0, 0, -0.18916378536627232, -0.179660980579041, 0, 0, 0, 0, 0, 0, 0, 0, 0.24764010809164083, 0.24764010809164083, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.20502509409574698, 0, 0, 0, 0, 0, 0.7803277830403155, 0.8111380948254938, 0, 0, 0, 0, 0, 0, 0
+    ],
+  [//SAD
+    -0.81, -0.57, 0, 0, 0, 0, 0, 0, 0.769674029541342, 0.8122890435372361, 0, 0, 0, 0, 0, 0, 0.5033301920670048, 0.46071517807111073, 0, 0.5565989595618721, 0, 0, 0, 0, 0, 0, 0, 0.3861389035782963, 0.02391128461319747, 0, 0, 0.5992139735577662, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    ],
+  [//SURPRISED
+    0.22, 0.98, 0, 0, 0, 0, 0, 0, 0.2582938615906143, 0.21567884759472045, 0.3754851500793228, 0.3541776430813759, 0, 0, 0.5779064665598193, 0.5779064665598193, 0, 0, 0, 0, 0, 0, 0, 0, 0.3435238895824022, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.2582938615906143, 0.26894761508958775, 0.13044881960293253, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    ],
+  [//SACRED
+    -0.25, 0.98, 0, 0, 0.21567884759472045, 0.1943713405967733, 0.5, 0.5, 0.5246376990649517, 0.5, 0, 0, 0, 0, 0.15, 0.15, 0, 0, 0, 0, 0, 0, 0, 0, 0.3435238895824022, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.2582938615906143, 0.26894761508958775, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    ],
+  [//DISGUSTED
+    -0.96, 0.23, 0, 0, 0, 0, 0.42875391757419035, 0.49267643856803134, 0, 0, 0, 0, 0, 0, 0, 0, 0.23698635459266737, 0.15175632660087945, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.21567884759472045, 0, 0, 0.3104116803737398, 0.3541776430813759, 0, 0, 0.7, 0.7, 0, 0, 0, 0.4713689315700842, 0.3435238895824022
+    ],
+    [//CONTEMPT
+      -0.98, -0.21, 0.1, 0.1, 0, 0, 0, 0, 0, 0, 0.24764010809164083, 0.26894761508958775, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.4981226368365037, 0, 0, 0, 0, 0, 0, 0, 0.10914131260498539, 0, 0, 0, 0, 0, 0, 0, 0
+    ],
+    [//NEUTRAL
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    ]
+]
 
 FacialExpr.prototype._p = vec3.create();
 FacialExpr.prototype._pA = vec3.create();
@@ -230,6 +255,38 @@ function FacialExpr (faceData, shift, sceneBSW){
 
   // Init face valaro
   if (faceData.valaro){
+    this.initFaceValAro(faceData, shift);
+    return;
+  }
+  else if(faceData.emotion){
+    switch(faceData.emotion)
+    {
+      case "ANGER":        
+        faceData.valaro = this._pit[0].slice(0,2);
+        break;
+      case "HAPPINESS":
+        faceData.valaro = this._pit[1].slice(0,2);
+        break;
+      case "SADNESS":
+        faceData.valaro = this._pit[2].slice(0,2);   
+        break;
+      case "SURPRISE":
+        faceData.valaro = this._pit[3].slice(0,2);
+        break;
+      case "FEAR":
+        faceData.valaro = this._pit[4].slice(0,2);
+        break;
+      case "DISGUST":
+        faceData.valaro = this._pit[5].slice(0,2);
+        break;
+      case "CONTEMPT":
+        faceData.valaro = this._pit[6].slice(0,2);
+        break;
+      case "NEUTRAL":        
+        faceData.valaro = this._pit[7].slice(0,2);
+        
+        break;
+    }
     this.initFaceValAro(faceData, shift);
     return;
   }
@@ -449,11 +506,14 @@ FacialExpr.prototype.updateVABSW = function(interVABSW, dt){
 
   // Immediate change
   if (this.attackPeak == 0 && this.end == 0 && this.time == 0){
-    for (var i = 0; i < this.indicesVA.length; i++)
-    {
-      for(var j = 0; j < this.indicesVA[i].length; j++)
-        interVABSW[FacialExpr.BODY_NAME][this.indicesVA[i][j]] = this.targetVABSW[i][j];
-    }
+    /*for (var i = 0; i < this.indicesVA.length; i++)
+    {*/
+      //for(var j = 0; j < this.indicesVA[i].length; j++)
+      
+        //interVABSW[FacialExpr.BODY_NAME][this.indicesVA[i][j]] = this.targetVABSW[i][j];
+    /*}*/
+    for(var j in this.targetVABSW)
+        interVABSW[FacialExpr.BODY_NAME][j] = this.targetVABSW[j];
     // Increase time and exit
     this.time +=dt;
     return;
@@ -483,11 +543,13 @@ FacialExpr.prototype.updateVABSW = function(interVABSW, dt){
     inter = Math.cos(Math.PI*inter+Math.PI)*0.5 + 0.5;
     //inter = Math.cos(Math.PI*inter+Math.PI)*0.5 + 0.5; // to increase curve, keep adding cosines
     // Interpolation
-    for (var i = 0; i < this.indicesVA.length; i++)
+    /*for (var i = 0; i < this.indicesVA.length; i++)
     {
       for(var j = 0; j < this.indicesVA[i].length; j++)
         interVABSW[FacialExpr.BODY_NAME][this.indicesVA[i][j]] = this.initialVABSW[i][j]*(1-inter) + this.targetVABSW[i][j]*inter;
-    }
+    }*/
+    for(var j in this.targetVABSW)
+        interVABSW[FacialExpr.BODY_NAME][j] = this.initialVABSW[j]*(1-inter) + this.targetVABSW[j]*inter;
   }
   
   // Trans 2
@@ -496,11 +558,13 @@ FacialExpr.prototype.updateVABSW = function(interVABSW, dt){
     // Cosine interpolation
     inter = Math.cos(Math.PI*inter)*0.5 + 0.5;
     // Interpolation
-    for (var i = 0; i < this.indicesVA.length; i++)
+    /*for (var i = 0; i < this.indicesVA.length; i++)
     {
       for(var j = 0; j < this.indicesVA[i].length; j++)
         interVABSW[FacialExpr.BODY_NAME][this.indicesVA[i][j]] = this.initialVABSW[i][j]*(1-inter) + this.targetVABSW[i][j]*inter;
-    }
+    }*/
+    for(var j in this.targetVABSW)
+        interVABSW[FacialExpr.BODY_NAME][j] = this.initialVABSW[j]*(1-inter) + this.targetVABSW[j]*inter;
   }
   
   // End
@@ -577,21 +641,178 @@ FacialExpr.prototype.updateLexemesBSW = function(interLexBSW, dt){
   {
     this.transition = false;
   }
-  
-
 }
 
 
+FacialExpr.prototype.precomputeVAWeights = function(gridsize){
+  var points = this.points;
+  var num_points = points.length;
+  var pos = vec2.create();
+  var circular = true;
+  this._values_changed = false;
+  this._version++;
+  
+  var total_nums = 2 * gridsize * gridsize;
+  if(!this._precomputed_weights || this._precomputed_weights.length != total_nums )
+    this._precomputed_weights = new Float32Array( total_nums );
+  var values = this._precomputed_weights;
+  this._precomputed_weights_gridsize = gridsize;
 
+  for(var y = 0; y < gridsize; ++y)
+    for(var x = 0; x < gridsize; ++x)
+    {
+      var nearest = -1;
+      var min_dist = 100000;
+      for(var i = 0; i < num_points; ++i)
+      {
+        pos[0] = x / gridsize;
+        pos[1] = y / gridsize;
+        if(circular)
+        {
+          pos[0] = pos[0] * 2 - 1;
+          pos[1] = pos[1] * 2 - 1;
+        }
 
+        var dist = vec2.distance( pos, points[i].pos );
+        if( dist > min_dist )
+          continue;
+        nearest = i;
+        min_dist = dist;
+      }
 
+      values[ x*2 + y*2*gridsize ] = nearest;
+      values[ x*2 + y*2*gridsize + 1] = min_dist;
+    }
+
+  return values;
+}
 
 
 
 FacialExpr.prototype.VA2BSW = function(valAro, facialBSW){
   
   maxDist = 0.8;
+  var gridsize = 100;
+  //var blendValues = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]; // Memory leak, could use facialBSW and set to 0 with a for loop
+  var bNumber = 18;
+  var blendValues = [];
+  blendValues.length = this._pit[0].length - 2;
+  blendValues.fill(0);
+
+  this._p[0] = valAro[0];
+  this._p[1] = valAro[1];
+  this._p[2] = 0; // why vec3, if z component is always 0, like pA?
+  var pos = vec2.create();
+  pos.set(valAro);
+  this._pA[2] = 0;
+  this.points = [];
+  for (var count = 0; count < this._pit.length; count++){
+    this._pA[0] = this._pit[count][0];
+    this._pA[1] = this._pit[count][1];
+    var point = vec2.create();
+    point.set([this._pA[0], this._pA[1]]);
+    this.points.push({pos: point})
+
+    /*var dist = vec3.dist(this._pA, this._p);
+    dist = maxDist - dist;
+
+    // If the emotion (each row is an emotion in pit) is too far away from the act-eval point, discard
+    if (dist > 0){
+      for (var i = 0; i < bNumber-2; i++){
+        blendValues[i] += this._pit[count][i+2] * dist;
+      }
+    }*/
+  }
+  //precompute VA points weight in the grid
+  var values = this._precomputed_weights;
+  if(!values || this._values_changed )
+    values = this.precomputeVAWeights(gridsize);
+
+  var pos2 = vec2.create();
+  var circular = true;
+  var weights = [];
+  weights.length = this._pit.length;
+  weights.fill(0);
+ //weights = blendValues
+  var total_inside = 0;
+  for(var y = 0; y < gridsize; ++y)
+    for(var x = 0; x < gridsize; ++x)
+    {
+      pos2[0] = x / gridsize;
+      pos2[1] = y / gridsize;
+      if(circular)
+      {
+        pos2[0] = pos2[0] * 2 - 1;
+        pos2[1] = pos2[1] * 2 - 1;
+      }
+      var data_pos = x*2 + y * gridsize*2;
+      var point_index = values[ data_pos ];
+      var is_inside = vec2.distance( pos2, pos ) < (values[ data_pos + 1] + 0.001); //epsilon
+      if(is_inside)
+      {
+        weights[ point_index ] += 1;
+        total_inside++;
+      }
+    }
+  for(var i = 0; i < weights.length; ++i)
+  {
+    weights[i] /= total_inside;
+    for (var j = 0; j < blendValues.length; j++){
+      blendValues[j] += this._pit[i][j+2] * weights[i];
+    }
+    //this.weights_obj[ this.points[i].name ] = weights[i];
+  }
+  this.initialVABSW = {};
+  this.targetVABSW = {};
+
+  for (var j = 0; j < blendValues.length; j++){
+    this.initialVABSW[j] = this.sceneBSW[FacialExpr.BODY_NAME][j];
+    this.targetVABSW[j] = blendValues[j];
+  }
+ /* this.indicesVA = [];
+  this.initialVABSW = {};
+  this.targetVABSW = {};
+  var j = 0;
+  for(var i=0; i< this.VALexemes.length; i++)
+  {
+    var index = this[this.VALexemes[i]].split("&");
   
+    if (index !== undefined)
+    {
+      // Indices
+      this.indicesVA[j] = index;
+     /* this.initialVABSW[j] = {};
+      this.targetVABSW[j] = [];*/
+    /*  for(var idx in index)
+      {
+        // Initial
+        var sign = 1;
+        if(index[idx].includes("-"))
+        {
+          sign = -1;
+          var ii = this.indicesVA.indexOf(idx);
+          index[idx] = index[idx].replace("-","");
+          this.indicesVA[j] = index[idx];
+        }
+        
+        this.initialVABSW[index[idx]] = this.sceneBSW[FacialExpr.BODY_NAME][index[idx]];
+        // Target
+        if(this.targetVABSW[index[idx]]!=undefined)
+          this.targetVABSW[index[idx]] += sign*blendValues[i];
+        else
+          this.targetVABSW[index[idx]] = sign*blendValues[i];
+      }
+    }
+    j++
+  }*/
+
+}
+
+
+FacialExpr.prototype.VA2BSW_old = function(valAro, facialBSW){
+  
+  maxDist = 0.8;
+
   var blendValues = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]; // Memory leak, could use facialBSW and set to 0 with a for loop
   var bNumber = 18;
   
@@ -600,10 +821,11 @@ FacialExpr.prototype.VA2BSW = function(valAro, facialBSW){
   this._p[2] = 0; // why vec3, if z component is always 0, like pA?
 
   this._pA[2] = 0;
-  
+ 
   for (var count = 0; count < this._pit.length; count++){
     this._pA[0] = this._pit[count][0];
     this._pA[1] = this._pit[count][1];
+
 
     var dist = vec3.dist(this._pA, this._p);
     dist = maxDist - dist;
@@ -615,6 +837,7 @@ FacialExpr.prototype.VA2BSW = function(valAro, facialBSW){
       }
     }
   }
+
   this.indicesVA = [];
   this.initialVABSW = [];
   this.targetVABSW = [];
@@ -768,8 +991,6 @@ FacialExpr.prototype.VA2BSW = function(valAro, facialBSW){
   facialBSW [15] = blendValues[14]; // DIMPLER_RIGHT
 */
 }
-
-
 
 
 
