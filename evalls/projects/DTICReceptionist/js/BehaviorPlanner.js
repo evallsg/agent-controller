@@ -453,7 +453,7 @@ BehaviorPlanner.prototype.updateBlinksAndSaccades = function(dt){
     if (!block) 
       block = {};
     
-    block.gazeShift = {
+   /* block.gazeShift = {
       start: 0,
       end: Math.random()*0.1+0.1,
       target: target, 
@@ -461,7 +461,7 @@ BehaviorPlanner.prototype.updateBlinksAndSaccades = function(dt){
       offsetDirection: randDir,
       offsetAngle: Math.random()*3,// + 2,
       type:"gazeShift"
-    }
+    }*/
     
     this.saccCountdown = this.saccDur;
     if (this.state ==LS.Globals.LISTENING || this.state == LS.Globals.SPEAKING)
@@ -511,28 +511,29 @@ BehaviorPlanner.prototype.attentionToUser = function(block, overwrite){
 		target: "CAMERA",
     offsetDirection: randOffset,
     offsetAngle: 2 + 5*Math.random(),
-    type:"headDir"
+    type:"headDirectionShift"
 	}
   
-  var faceShift = {
+  var faceVA = {
     start: startHead,
     end: end,
     valaro: [this.defaultValence, 0],
-    type:"faceShift"
+    type:"faceVA",
+    shift : true
   }
   
   // Force and remove existing bml instructions
   if (overwrite)
   {
     block.blink = blink;
-    block.faceShift = faceShift;
+    block.faceVA = faceVA;
     block.gazeShift = gazeShift;
     block.headDirectionShift = headDir;
   } 
   else
   {
     this.addToBlock(blink, block, "blink");
-    this.addToBlock(faceShift, block, "faceShift");
+    this.addToBlock(faceVA, block, "faceVA");
     this.addToBlock(gazeShift, block, "gazeShift");
     this.addToBlock(headDir, block, "headDirectionShift");
   }

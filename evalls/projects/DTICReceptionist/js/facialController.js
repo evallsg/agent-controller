@@ -3,13 +3,14 @@
 function FacialController(o) {
   //define some properties
   this.headNode = {};
+  this.lookAt = {}
   this.lookAtEyes = {};
   this.lookAtHead = {};
   this.lookAtNeck = {};
-  this.gazePositions = {
+  this._gazePositions = {
     "RIGHT": [60, 125, 400], "LEFT": [-80, 125, 400],
-    "UP": [-10, 165, 400], "DOWN": [-10, 105, 400],
-    "UPRIGHT": [60, 165, 400], "UPLEFT": [-80, 165, 400],
+    "UP": [-10, 200, 400], "DOWN": [-10, 105, 400],
+    "UPRIGHT": [60, 200, 400], "UPLEFT": [-80, 200, 400],
     "DOWNRIGHT": [60, 105, 400], "DOWNLEFT": [-80, 105, 400],
     "CAMERA": [-10, 125, 400]
     };
@@ -56,6 +57,7 @@ FacialController["@headNode"] = {type: "node_id", value: this.headNode}
 FacialController["@lookAtEyes"] = {type: "node_id", value: this.lookAtEyes}
 FacialController["@lookAtHead"] = {type: "node_id", value: this.lookAtHead}
 FacialController["@lookAtNeck"] = {type: "node_id", value: this.lookAtNeck}
+FacialController["@lookAt"] = {type: "node_id", value: this.lookAt}
 
 FacialController['@sadFactor'] = {type: "slider", max: 1, min: 0.1};
 FacialController['@smileFactor'] = {type: "slider", max: 1, min: 0.1};
@@ -162,15 +164,15 @@ FacialController.prototype.onStart = function()
   
   if (!this.headNode)
     console.error("Head bone node not found with id: ");
-  else if(!this.gazePositions["HEAD"])
+  else if(!this._gazePositions["HEAD"])
   {
     var headNode = LS.GlobalScene.getNodeByUId(this.headNode)
-		this.gazePositions["HEAD"] = headNode.transform.globalPosition;
+		this._gazePositions["HEAD"] = headNode.transform.globalPosition;
    
   }
   LS.GlobalScene.getActiveCameras(true);
   if (LS.GlobalScene._cameras[0])
-  	this.gazePositions["CAMERA"] = LS.GlobalScene.getCamera().getEye();
+  	this._gazePositions["CAMERA"] = LS.GlobalScene.getCamera().getEye();
   else
     console.error("Camera position not found for gaze.");
   
@@ -182,22 +184,22 @@ FacialController.prototype.onStart = function()
   
   if (!this.lookAtEyes) 
     console.error("LookAt Eyes not found");
-  else if(!this.gazePositions["EYES"]) 
-    this.gazePositions["EYES"] = lookAtEyesNode.transform.position;
+  else if(!this._gazePositions["EYESTARGET"]) 
+    this._gazePositions["EYESTARGET"] = lookAtEyesNode.transform.position;
   
   if (!this.lookAtHead) 
     console.error("LookAt Head not found");
-  else if( !this.gazePositions["HEAD"]) 
-    this.gazePositions["HEAD"] = lookAtHeadNode.transform.position;
+  else if( !this._gazePositions["HEADTARGET"]) 
+    this._gazePositions["HEADTARGET"] = lookAtHeadNode.transform.position;
   
   if (!this.lookAtNeck) 
     console.error("LookAt Neck not found");
-  else if( !this.gazePositions["NECK"] )
-    this.gazePositions["NECK"] = lookAtNeckNode.transform.position;
+  else if( !this._gazePositions["NECKTARGET"] )
+    this._gazePositions["NECKTARGET"] = lookAtNeckNode.transform.position;
 
 
   // Gaze manager
-  this.gazeManager = new GazeManager(lookAtNeckNode, lookAtHeadNode, lookAtEyesNode, this.gazePositions);
+  this.gazeManager = new GazeManager(lookAtNeckNode, lookAtHeadNode, lookAtEyesNode, this._gazePositions);
 
   /*
   // Head behavior
@@ -216,20 +218,40 @@ FacialController.prototype.onUpdate = function(e,dt)
   LS.GlobalScene.getActiveCameras(true);
   if (LS.GlobalScene._cameras[0])
   {
-  	this.gazePositions["CAMERA"] = LS.GlobalScene.getCamera().getEye();
+  	this._gazePositions["CAMERA"] = LS.GlobalScene.getCamera().getEye();
     //this.gazePositions["CAMERA"][2] = 400;
   }
  
   // Gaze
   if (this.gazeManager){
   	var weights = this.gazeManager.update(dt);
+    var i = 0;
+    if(weights.eyelids)
+      for(var morph in this._morphDeformers)
+      {
+        for(var j = 0; j< this._eyeLidsBS[i].length; j++){
+          
+          this._morphDeformers[morph][this._eyeLidsBS[i][j]].weight = weights.eyelids;
+        }
+        i++;
+      }
+    i = 0
+    if(weights.squint)
+      for(var morph in this._morphDeformers)
+      {
+        for(var j = 0; j< this._squintBS[i].length; j++){
     
-    var keys = Object.keys(this._facialBS);
+          this._morphDeformers[morph][this._squintBS[i][j]].weight = weights.squint;
+        }
+        i++;
+      }
+    /*var keys = Object.keys(this._facialBS);
     if(weights.eyelids !=undefined && weights.eyelids !=null)
     {
     	this._facialBS[keys[0]][this._eyeLidsBS[0][0]] = weights.eyelids
     	this._facialBS[keys[0]][this._squintBS[0][0]] = weights.squint
-    }
+      this._facialBS[keys[0]][[0]] = weights.eyelids
+    }*/
   }
    // Update facial expression
    this.faceUpdate(dt);
@@ -410,9 +432,9 @@ FacialController.prototype.facialBlend = function(dt)
   // Eye blink
 	var keys = Object.keys(this._facialBS);
   var blinkW = this._facialBS[keys[0]][this._eyeLidsBS[0][0]]
-  
+  if(blinkW) this._Blink.time = this._Blink.end;
   if (this._blinking && this._eyeLidsBS.length){
-    weight = this._Blink.update(dt, blinkW);
+    weight = this._Blink.update(dt);
     if (weight !== undefined)
       var i = 0;
       for(var morph in this._morphDeformers)
@@ -426,15 +448,7 @@ FacialController.prototype.facialBlend = function(dt)
     if (!this._Blink.transition)
       this._blinking = false;
   }
-  var i = 0;
-  for(var morph in this._morphDeformers)
-  {
-    for(var j = 0; j< this._squintBS[i].length; j++){
 
-      this._morphDeformers[morph][this._squintBS[i][j]].weight = this._morphDeformers[morph][this._squintBS[i][j]].weight*0.7 + 0.3*this._facialBS[keys[0]][this._squintBS[0][0]];
-    }
-    i++;
-  }
 }
 
 // --------------------- FACIAL EXPRESSIONS ---------------------
@@ -614,7 +628,7 @@ FacialController.prototype.resetFace = function(){
 // target [CAMERA, RIGHT, LEFT, UP, DOWN, UPRIGHT, UPLEFT, DOWNLEFT, DOWNRIGHT]
 
 // "HEAD" position is added onStart
-this.gazePositions = { 
+this._gazePositions = { 
   "RIGHT": [60, 125, 400], "LEFT": [-80, 125, 400],
   "UP": [-10, 165, 400], "DOWN": [-10, 105, 400],
   "UPRIGHT": [60, 165, 400], "UPLEFT": [-80, 165, 400],
@@ -651,10 +665,13 @@ FacialController.prototype.newGaze = function(gazeData, shift, gazePositions, he
 
   // TODO: recicle gaze in gazeManager
   var keys = Object.keys(this._facialBS);
+  var blinkW = this._facialBS[keys[0]][0]
   var eyelidsW = this._facialBS[keys[0]][this._eyeLidsBS[0][0]]
   var squintW = this._facialBS[keys[0]][this._squintBS[0][0]]
   gazeData.eyelidsWeight = eyelidsW; 
   gazeData.squintWeight = squintW; 
+  gazeData.blinkWeight = blinkW; 
+
   this.gazeManager.newGaze(gazeData, shift, gazePositions, headOnly);
  	
  /* var keys = Object.keys(this._facialBS);

@@ -22,8 +22,8 @@ function Blink (blinkData, eyeLidsBSW){
 }
 
 
-Blink.prototype.update = function(dt, facialEyeLidsBSW){
-  
+Blink.prototype.update = function(dt){
+
   this.time += dt;
   
   // Waiting to reach start
@@ -50,13 +50,13 @@ Blink.prototype.update = function(dt, facialEyeLidsBSW){
     // Cosine interpolation
     inter = Math.cos(Math.PI*inter)*0.5 + 0.5;
     // Interpolate with scene eyeLidsBSW
-    return facialEyeLidsBSW*(1-inter) + this.targetWeight * inter;
+    return this.initialWeight*(1-inter) + this.targetWeight * inter;
   }
   
   // End 
   if (this.time >= this.end){
     this.transition = false;
-    return facialEyeLidsBSW;
+    return this.initialWeight;
   }
   
 }
@@ -1009,12 +1009,18 @@ FacialExpr.prototype.VA2BSW_old = function(valAro, facialBSW){
 // Gaze manager (replace BML)
 GazeManager.prototype.gazePositions = {
   "RIGHT": [60, 125, 400], "LEFT": [-80, 125, 400],
-  "UP": [-10, 165, 400], "DOWN": [-10, 105, 400],
-  "UPRIGHT": [60, 165, 400], "UPLEFT": [-80, 165, 400],
+  "UP": [-10, 200, 400], "DOWN": [-10, 105, 400],
+  "UPRIGHT": [60, 200, 400], "UPLEFT": [-80, 200, 400],
   "DOWNRIGHT": [60, 105, 400], "DOWNLEFT": [-80, 105, 400],
   "CAMERA": [-10, 125, 400]
 };
-
+Gaze.prototype.gazeBS = {
+  "RIGHT": {squint:0, eyelids:0}, "LEFT": {squint:0, eyelids:0},
+  "UP": {squint:0.3, eyelids:0}, "DOWN": {squint:0, eyelids:0.5},
+  "UPRIGHT": {squint:0.3, eyelids:0}, "UPLEFT": {squint:0.3, eyelids:0},
+  "DOWNRIGHT": {squint:0, eyelids:0.5}, "DOWNLEFT": {squint:0, eyelids:0.5},
+  "CAMERA": {squint:0, eyelids:0}
+};
 
 // Constructor (lookAt objects and gazePositions)
 function GazeManager (lookAtNeck, lookAtHead, lookAtEyes, gazePositions){
@@ -1074,6 +1080,7 @@ GazeManager.prototype.update = function(dt){
       	this.gazeActions[i].update(dt, eyes);//update eyelids weight!!!!!!!!!!
         var eyelidsW = this.gazeActions[i].eyelidsW;
         var squintW = this.gazeActions[i].squintW;
+        var blinkW = this.gazeActions[i].blinkW;
       }
     }
 	}
@@ -1124,6 +1131,10 @@ Gaze.prototype.initGazeData = function(gazeData, shift){
   this.eyelidsInitW = gazeData.eyelidsWeight|| 0;
   this.squintW = gazeData.squintWeight|| 0;
   this.squintInitW = gazeData.squintWeight|| 0;
+  this.squintFinW = gazeData.squintWeight|| 0;
+  this.blinkW = gazeData.eyelidsWeight|| 0;
+  this.blinkInitW = gazeData.eyelidsWeight|| 0;
+  this.blinkFinW = gazeData.eyelidsWeight|| 0;
   // Sync
   this.start = gazeData.start || 0.0;
   this.end = gazeData.end || 2.0;
@@ -1191,11 +1202,12 @@ Gaze.prototype.update = function(dt , atEyes){
     // Cosine interpolation
     inter = Math.cos(Math.PI*inter+Math.PI)*0.5 + 0.5;
     
-    /*if(atEyes)
+    if(atEyes)
     {
-      this.eyelidsW =this.eyelidsInitW*inter+this.eyelidsFinW*(1-inter); 
-      this.squintW =this.squintInitW*(inter)+this.squintFinW*(1-inter); 
-    }*/
+      this.eyelidsW =this.eyelidsInitW*(1-inter)+this.eyelidsFinW*(inter); 
+      this.squintW =this.squintInitW*(1-inter)+this.squintFinW*(inter); 
+     
+    }
    // inter = Math.cos(Math.PI*inter+Math.PI)*0.5 + 0.5; // to increase curve, keep adding cosines
     // lookAt pos change
     vec3.lerp( this.lookAt.transform.position , this.InP, this.EndP, inter);
@@ -1209,12 +1221,13 @@ Gaze.prototype.update = function(dt , atEyes){
 
     // Cosine interpolation
     inter = Math.cos(Math.PI*inter + Math.PI)*0.5 + 0.5;
-    /*if(atEyes)
+    if(atEyes)
     {
      
     	this.eyelidsW =this.eyelidsInitW*(1-inter)+this.eyelidsFinW*(inter); 
       this.squintW =this.squintInitW*(1-inter)+this.squintFinW*(inter); 
-    }*/
+      
+    }
     // lookAt pos change
     vec3.lerp( this.lookAt.transform.position , this.InP, this.EndP, inter);
     this.lookAt.transform.mustUpdate = true;
@@ -1225,11 +1238,12 @@ Gaze.prototype.update = function(dt , atEyes){
 
   // End
   if (this.time > this.end){
-  /* if(atHead)
+   /*if(atEyes)
     {
      
-    	this.eyelidsW =this.eyelidsInitW*(this.time)+this.eyelidsFinW*(1-this.time); 
-      this.squintW =this.squintInitW*(this.time)+this.squintFinW*(1-this.time); 
+    	this.eyelidsW =this.eyelidsInitW*(inter)+this.eyelidsFinW*(1-inter); 
+      this.squintW =this.squintInitW*(inter)+this.squintFinW*(1-inter); 
+      this.blinkW =this.blinkInitW*(inter)+this.blinkFinW*(1-inter); 
     }*/
     if(!this.dynamic)
     	this.transition = false;
@@ -1255,10 +1269,16 @@ Gaze.prototype.initGazeValues = function(isEyes){
       if(this.target == "CAMERA")
       {
         // this.gazePositions[this.target][0]-=2;
+        var pos = vec3.create();
+        vec3.copy(pos,this.gazePositions[this.target])
+        pos[2] = 400;
+        if(this.influence == "HEAD" && this.target == "CAMERA"){
+          pos[0] -= pos[0] 
+        }
         if(isEyes)
-          this.gazePositions[this.target][1] += 5;
+          pos[1] += 5;
         else
-          this.gazePositions[this.target][1] -= 8;
+          pos[1] -= 8;
       }
       vec3.copy(this.targetP, this.gazePositions[this.target]);
     }else
@@ -1275,7 +1295,8 @@ Gaze.prototype.initGazeValues = function(isEyes){
   vec3.subtract(v, this.targetP, this.headPos);
   magn = vec3.length(v);
   vec3.normalize(v,v);
-  
+  this.eyelidsFinW = this.gazeBS[this.target].eyelids;
+  this.squintFinW = this.gazeBS[this.target].squint;
   // Rotate vector and reposition
   switch (this.offsetDirection){
     case "UPRIGHT":
@@ -1284,8 +1305,7 @@ Gaze.prototype.initGazeValues = function(isEyes){
       vec3.transformQuat(v,v,q);
       if(isEyes)
       {
-        this.eyelidsFinW =0
-      	this.squintFinW = 0.5
+      	this.squintFinW*=Math.abs(this.offsetAngle/30)
       }
       break;
     case "UPLEFT":
@@ -1294,8 +1314,8 @@ Gaze.prototype.initGazeValues = function(isEyes){
       vec3.transformQuat(v,v,q);
       if(isEyes)
       {
-        this.eyelidsFinW = 0
-        this.squintFinW = 0.5
+
+        this.squintFinW*=Math.abs(this.offsetAngle/30)
       }
       break;
     case "DOWNRIGHT":
@@ -1304,8 +1324,7 @@ Gaze.prototype.initGazeValues = function(isEyes){
       vec3.transformQuat(v,v,q);
       if(isEyes)
       {
-        this.eyelidsFinW = 0.1
-        this.squintFinW = 0
+        this.eyelidsFinW*=Math.abs(this.offsetAngle/30)
       }
       
       break;
@@ -1315,25 +1334,24 @@ Gaze.prototype.initGazeValues = function(isEyes){
       vec3.transformQuat(v,v,q);
       if(isEyes)
       {
-        this.eyelidsFinW = 0.1
-        this.squintFinW = 0
+        this.eyelidsFinW*=Math.abs(this.offsetAngle/30)
       }
       break; 
     case "RIGHT":
       vec3.rotateY(v,v,this.offsetAngle*DEG2RAD);
-      if(isEyes)
+      /*if(isEyes)
       {
         this.eyelidsFinW = 0
         this.squintFinW = 0
-      }
+      }*/
       break;
     case "LEFT":
       vec3.rotateY(v,v,-this.offsetAngle*DEG2RAD);
-      if(isEyes)
+      /*if(isEyes)
       {
         this.eyelidsFinW = 0
         this.squintFinW = 0
-      }
+      }*/
       break;
     case "UP":
       quat.setAxisAngle(q, v, -45*DEG2RAD);//quat.setAxisAngle(q, v, -90*DEG2RAD);
@@ -1341,8 +1359,8 @@ Gaze.prototype.initGazeValues = function(isEyes){
       vec3.transformQuat(v,v,q);
       if(isEyes)
       {
-        this.eyelidsFinW = 0
-        this.squintFinW = 0.5
+        //this.eyelidsFinW = 0
+        this.squintFinW*=Math.abs(this.offsetAngle/30)
       }
       break;
     case "DOWN":
@@ -1351,8 +1369,8 @@ Gaze.prototype.initGazeValues = function(isEyes){
       vec3.transformQuat(v,v,q);
       if(isEyes)
       {
-        this.eyelidsFinW = 0.2
-        this.squintFinW = 0
+  
+        this.eyelidsFinW*=Math.abs(this.offsetAngle/30)
       }
       break;
   }
